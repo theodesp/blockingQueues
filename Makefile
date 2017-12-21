@@ -10,7 +10,6 @@ format:
 .PHONY: debs
 debs:
 	GOPATH=$(GOPATH) go get ./...
-	GOPATH=$(GOPATH) go get -u github.com/spaolacci/murmur3
 	GOPATH=$(GOPATH) go get -u gopkg.in/check.v1
 	GOPATH=$(GOPATH) go get -u github.com/fortytw2/leaktest
 
