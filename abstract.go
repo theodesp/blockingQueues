@@ -1,10 +1,11 @@
 package blockingQueues
 
-// All Queues must implement this minimal interface
+// All Queues must implement this interface
 type Interface interface {
-	Offer(value interface{}) (bool, error)
+	Push(value interface{}) (bool, error)
+	Pop()(interface{}, error)
 	Poll() (interface{}, error)
-	Peek() (interface{}, error)
+	Peek() interface{}
 	Size() uint64
 	Capacity() uint64
 	Empty() bool

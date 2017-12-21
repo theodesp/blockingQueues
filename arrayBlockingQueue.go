@@ -22,6 +22,12 @@ type ArrayBlockingQueue struct {
 	// Condition for waiting writes
 	notFull *sync.Cond
 
+	// store index for next write
+	writeIndex uint64
+
+	// store index for next read or remove
+	readIndex uint64
+
 	// The underling store
 	store []interface{}
 }
@@ -61,16 +67,110 @@ func (q ArrayBlockingQueue) inc(idx uint64) uint64 {
 
 // Size returns this current elements size, is concurrent safe
 func (q ArrayBlockingQueue) Size() uint64 {
-	q.lock.Lock()
-	defer q.lock.Unlock()
+	q.lock.RLock()
+	defer q.lock.RUnlock()
 
 	return q.count
 }
 
 // Capacity returns this current elements remaining capacity, is concurrent safe
 func (q ArrayBlockingQueue) Capacity() uint64 {
-	q.lock.Lock()
-	defer q.lock.Unlock()
+	q.lock.RLock()
+	defer q.lock.RUnlock()
 
 	return uint64(uint64(len(q.store)) - q.count)
+}
+
+// Push element at current write position, advances, and signals.
+// Call only when holding lock.
+func (q *ArrayBlockingQueue) push(item interface{})  {
+	q.store[q.writeIndex] = item
+	q.writeIndex = q.inc(q.writeIndex)
+	q.count += 1
+	q.notEmpty.Signal()
+}
+
+// Pops element at current read position, advances, and signals.
+// Call only when holding lock.
+func (q *ArrayBlockingQueue) pop() (interface{}) {
+	var item = q.store[q.readIndex]
+	q.store[q.readIndex] = nil
+	q.readIndex = q.inc(q.readIndex)
+	q.count -= 1
+	q.notFull.Signal()
+
+	return item
+}
+
+// Pushes the specified element at the tail of the queue.
+// Does not block the current goroutine
+func (q *ArrayBlockingQueue) Push(item interface{}) (bool, error)  {
+	if q.Offer(item) {
+		return true, nil
+	} else {
+		return false, ErrorFull
+	}
+}
+
+// Inserts the specified element at the tail of this queue if it is possible to
+// do so immediately without exceeding the queue's capacity,
+// returning true upon success and false if this queue is full.
+// Does not block the current goroutine
+func (q *ArrayBlockingQueue) Offer(item interface{}) bool  {
+	if item == nil {
+		panic("Null item")
+	}
+
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	if q.count == uint64(len(q.store)){
+		return false
+	} else {
+		q.push(item)
+		return true
+	}
+}
+
+// Pops an element from the head of the queue.
+// Does not block the current goroutine
+func (q *ArrayBlockingQueue) Pop() (interface{}, error) {
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	if q.count == 0 {
+		// Case empty
+		return false, nil
+	} else {
+		var item = q.pop()
+		return item, nil
+	}
+}
+
+// Just attempts to return the tail element of the queue
+func (q ArrayBlockingQueue) Peek() interface{} {
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	if q.count == 0 {
+		// Case empty
+		return nil
+	} else {
+		var item = q.store[q.readIndex]
+		return item
+	}
+}
+
+func (q ArrayBlockingQueue) Empty() bool {
+	return q.Size() == 0
+}
+
+// Takes an element from the head of the queue.
+// It blocks the current goroutine if the queue is Empty until notified
+func (q *ArrayBlockingQueue) Get() (interface{}, error) {
+}
+
+// Puts an element to the tail of the queue.
+// It blocks the current goroutine if the queue is Full until notified
+func (q *ArrayBlockingQueue) Put(item interface{}) (bool, error) {
 }
