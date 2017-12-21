@@ -1,8 +1,8 @@
 package blockingQueues
 
 import (
-	"sync"
 	"container/list"
+	"sync"
 )
 
 type LinkedBlockingDeque struct {

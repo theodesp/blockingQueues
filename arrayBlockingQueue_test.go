@@ -10,7 +10,7 @@ import (
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { TestingT(t) }
 
-type ArrayBlockingQueueSuite struct{
+type ArrayBlockingQueueSuite struct {
 	queue *ArrayBlockingQueue
 }
 
@@ -49,9 +49,3 @@ func (s *ArrayBlockingQueueSuite) TestIncrement(c *C) {
 	s.queue.store = append(s.queue.store, 2)
 	c.Assert(s.queue.inc(2), Equals, uint64(0))
 }
-
-
-
-
-
-

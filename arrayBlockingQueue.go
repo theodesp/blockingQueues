@@ -1,8 +1,8 @@
 package blockingQueues
 
 import (
-	"sync"
 	"math"
+	"sync"
 )
 
 /**
@@ -34,7 +34,7 @@ type ArrayBlockingQueue struct {
 
 // Creates an ArrayBlockingQueue with the given (fixed) capacity
 // returns an error if the capacity is lesst than 1
-func NewArrayBlockingQueue(capacity uint64) (*ArrayBlockingQueue, error)  {
+func NewArrayBlockingQueue(capacity uint64) (*ArrayBlockingQueue, error) {
 	if capacity < 1 {
 		return nil, ErrorCapacity
 	}
@@ -42,14 +42,13 @@ func NewArrayBlockingQueue(capacity uint64) (*ArrayBlockingQueue, error)  {
 	lock := new(sync.RWMutex)
 
 	return &ArrayBlockingQueue{
-		lock: lock,
+		lock:     lock,
 		notEmpty: sync.NewCond(lock.RLocker()),
-		notFull: sync.NewCond(lock.RLocker()),
-		count: uint64(0),
-		store: make([]interface{}, capacity),
+		notFull:  sync.NewCond(lock.RLocker()),
+		count:    uint64(0),
+		store:    make([]interface{}, capacity),
 	}, nil
 }
-
 
 // Returns the next increment of idx. Circulates the index
 func (q ArrayBlockingQueue) inc(idx uint64) uint64 {
@@ -57,7 +56,7 @@ func (q ArrayBlockingQueue) inc(idx uint64) uint64 {
 		panic("Overflow")
 	}
 
-	if 1 + idx == uint64(len(q.store)) {
+	if 1+idx == uint64(len(q.store)) {
 		return 0
 	} else {
 		return idx + 1
@@ -82,7 +81,7 @@ func (q ArrayBlockingQueue) Capacity() uint64 {
 
 // Push element at current write position, advances, and signals.
 // Call only when holding lock.
-func (q *ArrayBlockingQueue) push(item interface{})  {
+func (q *ArrayBlockingQueue) push(item interface{}) {
 	q.store[q.writeIndex] = item
 	q.writeIndex = q.inc(q.writeIndex)
 	q.count += 1
@@ -91,7 +90,7 @@ func (q *ArrayBlockingQueue) push(item interface{})  {
 
 // Pops element at current read position, advances, and signals.
 // Call only when holding lock.
-func (q *ArrayBlockingQueue) pop() (interface{}) {
+func (q *ArrayBlockingQueue) pop() interface{} {
 	var item = q.store[q.readIndex]
 	q.store[q.readIndex] = nil
 	q.readIndex = q.inc(q.readIndex)
@@ -103,7 +102,7 @@ func (q *ArrayBlockingQueue) pop() (interface{}) {
 
 // Pushes the specified element at the tail of the queue.
 // Does not block the current goroutine
-func (q *ArrayBlockingQueue) Push(item interface{}) (bool, error)  {
+func (q *ArrayBlockingQueue) Push(item interface{}) (bool, error) {
 	if q.Offer(item) {
 		return true, nil
 	} else {
@@ -123,7 +122,7 @@ func (q *ArrayBlockingQueue) Offer(item interface{}) bool {
 	q.lock.RLock()
 	defer q.lock.RUnlock()
 
-	if q.count == uint64(len(q.store)){
+	if q.count == uint64(len(q.store)) {
 		return false
 	} else {
 		q.push(item)
@@ -172,8 +171,7 @@ func (q *ArrayBlockingQueue) Clear() {
 	// Start from head up to the tail
 	next := q.readIndex
 
-
-	for i := uint64(0);i < q.count;i +=1 {
+	for i := uint64(0); i < q.count; i += 1 {
 		q.store[next] = nil
 		next = q.inc(next)
 	}

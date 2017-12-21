@@ -10,7 +10,7 @@ type AbstractCollectionBase interface {
 // All Queues must implement this interface
 type Interface interface {
 	Push(item interface{}) (bool, error)
-	Pop()(interface{}, error)
+	Pop() (interface{}, error)
 
 	Poll() (interface{}, error)
 	Offer(item interface{}) bool
