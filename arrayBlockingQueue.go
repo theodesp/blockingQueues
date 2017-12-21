@@ -115,7 +115,7 @@ func (q *ArrayBlockingQueue) Push(item interface{}) (bool, error)  {
 // do so immediately without exceeding the queue's capacity,
 // returning true upon success and false if this queue is full.
 // Does not block the current goroutine
-func (q *ArrayBlockingQueue) Offer(item interface{}) bool  {
+func (q *ArrayBlockingQueue) Offer(item interface{}) bool {
 	if item == nil {
 		panic("Null item")
 	}
