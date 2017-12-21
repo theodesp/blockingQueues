@@ -3,7 +3,7 @@ package blockingQueues
 type AbstractCollectionBase interface {
 	Size() uint64
 	Capacity() uint64
-	Empty() bool
+	IsEmpty() bool
 	Clear()
 }
 

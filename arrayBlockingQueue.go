@@ -160,8 +160,28 @@ func (q ArrayBlockingQueue) Peek() interface{} {
 	}
 }
 
-func (q ArrayBlockingQueue) Empty() bool {
+func (q ArrayBlockingQueue) IsEmpty() bool {
 	return q.Size() == 0
+}
+
+// Clears all the queues elements, cleans up, signals waiters for queue is empty
+func (q *ArrayBlockingQueue) Clear() {
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	// Start from head up to the tail
+	next := q.readIndex
+
+
+	for i := uint64(0);i < q.count;i +=1 {
+		q.store[next] = nil
+		next = q.inc(next)
+	}
+
+	q.count = uint64(0)
+	q.readIndex = uint64(0)
+	q.writeIndex = uint64(0)
+	q.notFull.Broadcast()
 }
 
 //// Takes an element from the head of the queue.

@@ -23,7 +23,7 @@ bench:
 
 .PHONY: docs
 docs:
-	GOPATH=$(GOPATH) @find . -type f -name "*.go*" -print0 | xargs -0 gocco
+	GOPATH=$(GOPATH) find . -type f -name "*.go*" -print0 | xargs -0 gocco
 
 # Clean junk
 .PHONY: clean
