@@ -57,11 +57,10 @@ func (q ArrayBlockingQueue) inc(idx uint64) uint64 {
 		panic("Overflow")
 	}
 
-	var i = idx + 1
-	if i == uint64(len(q.store)) {
+	if 1 + idx == uint64(len(q.store)) {
 		return 0
 	} else {
-		return i
+		return idx + 1
 	}
 }
 
@@ -165,12 +164,12 @@ func (q ArrayBlockingQueue) Empty() bool {
 	return q.Size() == 0
 }
 
-// Takes an element from the head of the queue.
-// It blocks the current goroutine if the queue is Empty until notified
-func (q *ArrayBlockingQueue) Get() (interface{}, error) {
-}
-
-// Puts an element to the tail of the queue.
-// It blocks the current goroutine if the queue is Full until notified
-func (q *ArrayBlockingQueue) Put(item interface{}) (bool, error) {
-}
+//// Takes an element from the head of the queue.
+//// It blocks the current goroutine if the queue is Empty until notified
+//func (q *ArrayBlockingQueue) Get() (interface{}, error) {
+//}
+//
+//// Puts an element to the tail of the queue.
+//// It blocks the current goroutine if the queue is Full until notified
+//func (q *ArrayBlockingQueue) Put(item interface{}) (bool, error) {
+//}
