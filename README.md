@@ -10,8 +10,13 @@ provide good documentation on the code and some examples of usage.
 * **ArrayBlockingDeque**: A bounded blocking deque backed by a slice
 * **ArrayBlockingPriorityQueue**: A bounded blocking PriorityQueue backed by a slice
 
+* **LinkedBlockingQueue**: A bounded blocking queue backed by a container/list
+* **LinkedBlockingDeque**: A bounded blocking deque backed by a container/list
+
 ## Installation
+```go
 go get -u github.com/theodesp/blockingQueues
+```
 
 ## Usage
 TODO
