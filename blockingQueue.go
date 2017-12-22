@@ -153,7 +153,7 @@ func (q *BlockingQueue) Clear() {
 	next := q.readIndex
 
 	for i := uint64(0); i < q.count; i += 1 {
-		q.store.Set(nil, next)
+		q.store.Remove(next)
 		next = q.inc(next)
 	}
 
