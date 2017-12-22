@@ -11,7 +11,7 @@ import (
 func Test(t *testing.T) { TestingT(t) }
 
 type ArrayBlockingQueueSuite struct {
-	queue *ArrayBlockingQueue
+	queue *BlockingQueue
 }
 
 var _ = Suite(&ArrayBlockingQueueSuite{})
@@ -45,7 +45,7 @@ func (s *ArrayBlockingQueueSuite) TestIncrement(c *C) {
 	c.Assert(s.queue.inc(20), Equals, uint64(21))
 	c.Assert(s.queue.inc(math.MaxUint64), PanicMatches, "Overflow")
 
-	s.queue.store = append(s.queue.store, 1)
-	s.queue.store = append(s.queue.store, 2)
+	s.queue.store.Set(1, uint64(0))
+	s.queue.store.Set(2, uint64(1))
 	c.Assert(s.queue.inc(2), Equals, uint64(0))
 }

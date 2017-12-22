@@ -20,24 +20,28 @@
                   abstract.go
               </a>
               
-              <a class="source" href="arrayBlockingDeque.html">
-                  arrayBlockingDeque.go
-              </a>
-              
               <a class="source" href="arrayBlockingQueue.html">
                   arrayBlockingQueue.go
               </a>
               
-              <a class="source" href="arrayBlockingQueue_test.html">
-                  arrayBlockingQueue_test.go
+              <a class="source" href="blockingQueue.html">
+                  blockingQueue.go
+              </a>
+              
+              <a class="source" href="blockingQueue_test.html">
+                  blockingQueue_test.go
               </a>
               
               <a class="source" href="errors.html">
                   errors.go
               </a>
               
-              <a class="source" href="linkedBlockingDeque.html">
-                  linkedBlockingDeque.go
+              <a class="source" href="linkedBlockingQueue.html">
+                  linkedBlockingQueue.go
+              </a>
+              
+              <a class="source" href="linkedBlockingQueue_test.html">
+                  linkedBlockingQueue_test.go
               </a>
               
           </div>
@@ -68,16 +72,35 @@
             <td class="code">
                 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">blockingQueues</span>
 
-<span class="kn">import</span> <span class="p">(</span>
-	<span class="s">&quot;math&quot;</span>
-	<span class="s">&quot;sync&quot;</span>
-<span class="p">)</span>
+<span class="kn">import</span> <span class="s">&quot;sync&quot;</span>
 
-<span class="cm">/**</span>
-<span class="cm"> * ArrayBlockingQueue is A multi-producer, multi-consumer queue</span>
-<span class="cm"> */</span>
+<span class="kd">type</span> <span class="nx">ArrayStore</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">store</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}</span>
+<span class="p">}</span>
 
-<span class="kd">type</span> <span class="nx">ArrayBlockingQueue</span> <span class="kd">struct</span> <span class="p">{</span></pre></div>
+<span class="kd">func</span> <span class="nx">NewArrayStore</span><span class="p">(</span><span class="nx">size</span> <span class="kt">uint64</span><span class="p">)</span> <span class="o">*</span><span class="nx">ArrayStore</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">ArrayStore</span><span class="p">{</span>
+		<span class="nx">store</span><span class="p">:</span> <span class="nb">make</span><span class="p">([]</span><span class="kd">interface</span><span class="p">{},</span> <span class="nx">size</span><span class="p">),</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">ArrayStore</span><span class="p">)</span> <span class="nx">Set</span><span class="p">(</span><span class="nx">value</span> <span class="kd">interface</span><span class="p">{},</span> <span class="nx">pos</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">s</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">pos</span><span class="p">]</span> <span class="p">=</span> <span class="nx">value</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">ArrayStore</span><span class="p">)</span> <span class="nx">Get</span><span class="p">(</span><span class="nx">pos</span> <span class="kt">uint64</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nx">s</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">pos</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">ArrayStore</span><span class="p">)</span> <span class="nx">Remove</span><span class="p">(</span><span class="nx">pos</span> <span class="kt">uint64</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">item</span> <span class="p">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">pos</span><span class="p">]</span>
+	<span class="nx">s</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">pos</span><span class="p">]</span> <span class="p">=</span> <span class="kc">nil</span>
+	<span class="k">return</span> <span class="nx">item</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="nx">ArrayStore</span><span class="p">)</span> <span class="nx">Size</span><span class="p">()</span> <span class="kt">uint64</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">store</span><span class="p">))</span>
+<span class="p">}</span></pre></div>
             </td>
           </tr>
           
@@ -86,479 +109,25 @@
               <div class="pilwrap">
                   <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-                <p>The number of items in the Queue</p>
+                <p>Creates an BlockingQueue backed by an Array with the given (fixed) capacity
+returns an error if the capacity is less than 1</p>
 
             </td>
             <td class="code">
-                <div class="highlight"><pre>	<span class="nx">count</span> <span class="kt">uint64</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-3">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-3">&#182;</a>
-              </div>
-                <p>Main lock guarding all access</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">lock</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-4">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-4">&#182;</a>
-              </div>
-                <p>Condition for waiting reads</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">notEmpty</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">Cond</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-5">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-5">&#182;</a>
-              </div>
-                <p>Condition for waiting writes</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">notFull</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">Cond</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-6">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-                <p>store index for next write</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">writeIndex</span> <span class="kt">uint64</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-7">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-                <p>store index for next read or remove</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">readIndex</span> <span class="kt">uint64</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-8">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-8">&#182;</a>
-              </div>
-                <p>The underling store</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">store</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-9">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-                <p>Creates an ArrayBlockingQueue with the given (fixed) capacity
-returns an error if the capacity is lesst than 1</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="nx">NewArrayBlockingQueue</span><span class="p">(</span><span class="nx">capacity</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+                <div class="highlight"><pre><span class="kd">func</span> <span class="nx">NewArrayBlockingQueue</span><span class="p">(</span><span class="nx">capacity</span> <span class="kt">uint64</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="nx">BlockingQueue</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
 	<span class="k">if</span> <span class="nx">capacity</span> <span class="p">&lt;</span> <span class="mi">1</span> <span class="p">{</span>
 		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">ErrorCapacity</span>
 	<span class="p">}</span>
 
 	<span class="nx">lock</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span><span class="p">)</span>
 
-	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">ArrayBlockingQueue</span><span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">BlockingQueue</span><span class="p">{</span>
 		<span class="nx">lock</span><span class="p">:</span>     <span class="nx">lock</span><span class="p">,</span>
 		<span class="nx">notEmpty</span><span class="p">:</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">NewCond</span><span class="p">(</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLocker</span><span class="p">()),</span>
 		<span class="nx">notFull</span><span class="p">:</span>  <span class="nx">sync</span><span class="p">.</span><span class="nx">NewCond</span><span class="p">(</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLocker</span><span class="p">()),</span>
 		<span class="nx">count</span><span class="p">:</span>    <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-		<span class="nx">store</span><span class="p">:</span>    <span class="nb">make</span><span class="p">([]</span><span class="kd">interface</span><span class="p">{},</span> <span class="nx">capacity</span><span class="p">),</span>
+		<span class="nx">store</span><span class="p">:</span>    <span class="nx">NewArrayStore</span><span class="p">(</span><span class="nx">capacity</span><span class="p">),</span>
 	<span class="p">},</span> <span class="kc">nil</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-10">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-                <p>Returns the next increment of idx. Circulates the index</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">inc</span><span class="p">(</span><span class="nx">idx</span> <span class="kt">uint64</span><span class="p">)</span> <span class="kt">uint64</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">idx</span> <span class="o">&gt;=</span> <span class="nx">math</span><span class="p">.</span><span class="nx">MaxUint64</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&quot;Overflow&quot;</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="k">if</span> <span class="mi">1</span><span class="o">+</span><span class="nx">idx</span> <span class="o">==</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">))</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="mi">0</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="nx">idx</span> <span class="o">+</span> <span class="mi">1</span>
-	<span class="p">}</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-11">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-11">&#182;</a>
-              </div>
-                <p>Size returns this current elements size, is concurrent safe</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Size</span><span class="p">()</span> <span class="kt">uint64</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">return</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-12">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-                <p>Capacity returns this current elements remaining capacity, is concurrent safe</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Capacity</span><span class="p">()</span> <span class="kt">uint64</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">return</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">))</span> <span class="o">-</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span><span class="p">)</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-13">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
-                <p>Push element at current write position, advances, and signals.
-Call only when holding lock.</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">push</span><span class="p">(</span><span class="nx">item</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">q</span><span class="p">.</span><span class="nx">writeIndex</span><span class="p">]</span> <span class="p">=</span> <span class="nx">item</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">writeIndex</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">inc</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">writeIndex</span><span class="p">)</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">+=</span> <span class="mi">1</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">notEmpty</span><span class="p">.</span><span class="nx">Signal</span><span class="p">()</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-14">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-                <p>Pops element at current read position, advances, and signals.
-Call only when holding lock.</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">pop</span><span class="p">()</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
-	<span class="kd">var</span> <span class="nx">item</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span><span class="p">]</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span><span class="p">]</span> <span class="p">=</span> <span class="kc">nil</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">inc</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span><span class="p">)</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">-=</span> <span class="mi">1</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">notFull</span><span class="p">.</span><span class="nx">Signal</span><span class="p">()</span>
-
-	<span class="k">return</span> <span class="nx">item</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-15">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-                <p>Pushes the specified element at the tail of the queue.
-Does not block the current goroutine</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Push</span><span class="p">(</span><span class="nx">item</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="kt">bool</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Offer</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">true</span><span class="p">,</span> <span class="kc">nil</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">ErrorFull</span>
-	<span class="p">}</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-16">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-16">&#182;</a>
-              </div>
-                <p>Inserts the specified element at the tail of this queue if it is possible to
-do so immediately without exceeding the queue&rsquo;s capacity,
-returning true upon success and false if this queue is full.
-Does not block the current goroutine</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Offer</span><span class="p">(</span><span class="nx">item</span> <span class="kd">interface</span><span class="p">{})</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">item</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&quot;Null item&quot;</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">if</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">==</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">))</span> <span class="p">{</span>
-		<span class="k">return</span> <span class="kc">false</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="nx">q</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
-		<span class="k">return</span> <span class="kc">true</span>
-	<span class="p">}</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-17">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-17">&#182;</a>
-              </div>
-                <p>Pops an element from the head of the queue.
-Does not block the current goroutine</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Pop</span><span class="p">()</span> <span class="p">(</span><span class="kd">interface</span><span class="p">{},</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">if</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-18">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-18">&#182;</a>
-              </div>
-                <p>Case empty</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>		<span class="k">return</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">nil</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="kd">var</span> <span class="nx">item</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-		<span class="k">return</span> <span class="nx">item</span><span class="p">,</span> <span class="kc">nil</span>
-	<span class="p">}</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-19">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-19">&#182;</a>
-              </div>
-                <p>Just attempts to return the tail element of the queue</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Peek</span><span class="p">()</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">if</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-20">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-20">&#182;</a>
-              </div>
-                <p>Case empty</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>		<span class="k">return</span> <span class="kc">nil</span>
-	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-		<span class="kd">var</span> <span class="nx">item</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span><span class="p">]</span>
-		<span class="k">return</span> <span class="nx">item</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-
-<span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">IsEmpty</span><span class="p">()</span> <span class="kt">bool</span> <span class="p">{</span>
-	<span class="k">return</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-21">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
-                <p>Clears all the queues elements, cleans up, signals waiters for queue is empty</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Clear</span><span class="p">()</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-22">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-22">&#182;</a>
-              </div>
-                <p>Start from head up to the tail</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="nx">next</span> <span class="o">:=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span>
-
-	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">1</span> <span class="p">{</span>
-		<span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">[</span><span class="nx">next</span><span class="p">]</span> <span class="p">=</span> <span class="kc">nil</span>
-		<span class="nx">next</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">inc</span><span class="p">(</span><span class="nx">next</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="p">=</span> <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">readIndex</span> <span class="p">=</span> <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">writeIndex</span> <span class="p">=</span> <span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">notFull</span><span class="p">.</span><span class="nx">Broadcast</span><span class="p">()</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-23">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-23">&#182;</a>
-              </div>
-                <p>Takes an element from the head of the queue.
-It blocks the current goroutine if the queue is Empty until notified</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Get</span><span class="p">()</span> <span class="p">(</span><span class="kd">interface</span><span class="p">{},</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">for</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-24">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-24">&#182;</a>
-              </div>
-                <p>We wait here until the queue has an item</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>		<span class="nx">q</span><span class="p">.</span><span class="nx">notEmpty</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
-	<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-25">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-25">&#182;</a>
-              </div>
-                <p>Critical section after wait released and predicate is false</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="kd">var</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Pop</span><span class="p">()</span>
-	<span class="k">return</span> <span class="nx">item</span><span class="p">,</span> <span class="nx">err</span>
-<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-26">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-26">&#182;</a>
-              </div>
-                <p>Puts an element to the tail of the queue.
-It blocks the current goroutine if the queue is Full until notified</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre><span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">ArrayBlockingQueue</span><span class="p">)</span> <span class="nx">Put</span><span class="p">(</span><span class="nx">item</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="kt">bool</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-	<span class="k">if</span> <span class="nx">item</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
-		<span class="nb">panic</span><span class="p">(</span><span class="s">&quot;Null item&quot;</span><span class="p">)</span>
-	<span class="p">}</span>
-
-	<span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
-	<span class="k">defer</span> <span class="nx">q</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
-
-	<span class="k">for</span> <span class="nx">q</span><span class="p">.</span><span class="nx">count</span> <span class="o">==</span> <span class="nb">uint64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">store</span><span class="p">))</span> <span class="p">{</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-27">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-27">&#182;</a>
-              </div>
-                <p>We wait here until the queue has an empty slot</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>		<span class="nx">q</span><span class="p">.</span><span class="nx">notFull</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
-	<span class="p">}</span></pre></div>
-            </td>
-          </tr>
-          
-          <tr id="section-28">
-            <td class="docs">
-              <div class="pilwrap">
-                  <a class="pilcrow" href="#section-28">&#182;</a>
-              </div>
-                <p>Critical section after wait released and predicate is false</p>
-
-            </td>
-            <td class="code">
-                <div class="highlight"><pre>	<span class="kd">var</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span>
-	<span class="k">return</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">err</span>
 <span class="p">}</span>
 
 </pre></div>

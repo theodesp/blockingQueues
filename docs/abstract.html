@@ -20,24 +20,28 @@
                   abstract.go
               </a>
               
-              <a class="source" href="arrayBlockingDeque.html">
-                  arrayBlockingDeque.go
-              </a>
-              
               <a class="source" href="arrayBlockingQueue.html">
                   arrayBlockingQueue.go
               </a>
               
-              <a class="source" href="arrayBlockingQueue_test.html">
-                  arrayBlockingQueue_test.go
+              <a class="source" href="blockingQueue.html">
+                  blockingQueue.go
+              </a>
+              
+              <a class="source" href="blockingQueue_test.html">
+                  blockingQueue_test.go
               </a>
               
               <a class="source" href="errors.html">
                   errors.go
               </a>
               
-              <a class="source" href="linkedBlockingDeque.html">
-                  linkedBlockingDeque.go
+              <a class="source" href="linkedBlockingQueue.html">
+                  linkedBlockingQueue.go
+              </a>
+              
+              <a class="source" href="linkedBlockingQueue_test.html">
+                  linkedBlockingQueue_test.go
               </a>
               
           </div>
@@ -87,6 +91,8 @@
             </td>
             <td class="code">
                 <div class="highlight"><pre><span class="kd">type</span> <span class="nx">Interface</span> <span class="kd">interface</span> <span class="p">{</span>
+	<span class="nx">AbstractCollectionBase</span>
+
 	<span class="nx">Push</span><span class="p">(</span><span class="nx">item</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">(</span><span class="kt">bool</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
 	<span class="nx">Pop</span><span class="p">()</span> <span class="p">(</span><span class="kd">interface</span><span class="p">{},</span> <span class="kt">error</span><span class="p">)</span>
 
@@ -94,8 +100,13 @@
 	<span class="nx">Offer</span><span class="p">(</span><span class="nx">item</span> <span class="kd">interface</span><span class="p">{})</span> <span class="kt">bool</span>
 
 	<span class="nx">Peek</span><span class="p">()</span> <span class="kd">interface</span><span class="p">{}</span>
+<span class="p">}</span>
 
-	<span class="nx">AbstractCollectionBase</span>
+<span class="kd">type</span> <span class="nx">QueueStore</span> <span class="kd">interface</span> <span class="p">{</span>
+	<span class="nx">Set</span><span class="p">(</span><span class="nx">value</span> <span class="kd">interface</span><span class="p">{},</span> <span class="nx">pos</span> <span class="kt">uint64</span><span class="p">)</span>
+	<span class="nx">Remove</span><span class="p">(</span><span class="nx">pos</span> <span class="kt">uint64</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span>
+	<span class="nx">Get</span><span class="p">(</span><span class="nx">pos</span> <span class="kt">uint64</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span>
+	<span class="nx">Size</span><span class="p">()</span> <span class="kt">uint64</span>
 <span class="p">}</span>
 
 </pre></div>

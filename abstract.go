@@ -9,6 +9,8 @@ type AbstractCollectionBase interface {
 
 // All Queues must implement this interface
 type Interface interface {
+	AbstractCollectionBase
+
 	Push(item interface{}) (bool, error)
 	Pop() (interface{}, error)
 
@@ -16,6 +18,11 @@ type Interface interface {
 	Offer(item interface{}) bool
 
 	Peek() interface{}
+}
 
-	AbstractCollectionBase
+type QueueStore interface {
+	Set(value interface{}, pos uint64)
+	Remove(pos uint64) interface{}
+	Get(pos uint64) interface{}
+	Size() uint64
 }
