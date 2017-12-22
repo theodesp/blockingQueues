@@ -119,7 +119,7 @@ func (q *BlockingQueue) Pop() (interface{}, error) {
 
 	if q.count == 0 {
 		// Case empty
-		return false, nil
+		return false, ErrorEmpty
 	} else {
 		var item = q.pop()
 		return item, nil

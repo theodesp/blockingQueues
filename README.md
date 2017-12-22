@@ -33,11 +33,12 @@ Using:
 
 Simple operations - no goroutines
 
-```go
-PASS: ArrayBlockingQueueSuite.BenchmarkPop    50000000                49.1 ns/op
-PASS: ArrayBlockingQueueSuite.BenchmarkPopOverflow    50000000                51.3 ns/op
-PASS: ArrayBlockingQueueSuite.BenchmarkPush   20000000                84.7 ns/op
-PASS: ArrayBlockingQueueSuite.BenchmarkPushOverflow   20000000                75.3 ns/op
+```text
+ArrayBlockingQueueSuite.BenchmarkPeek  50000000                56.5 ns/op
+ArrayBlockingQueueSuite.BenchmarkPop    50000000                49.1 ns/op
+ArrayBlockingQueueSuite.BenchmarkPopOverflow    50000000                51.3 ns/op
+ArrayBlockingQueueSuite.BenchmarkPush   20000000                84.7 ns/op
+ArrayBlockingQueueSuite.BenchmarkPushOverflow   20000000                75.3 ns/op
 ```
 
 ## LICENCE

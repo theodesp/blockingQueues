@@ -51,11 +51,15 @@ func (s *ArrayBlockingQueueSuite) TestIncrement(c *C) {
 }
 
 func (s *ArrayBlockingQueueSuite) TestPush(c *C) {
-	for i:= 0;i < 10; i+=1 {
+	for i:= 0;i < 16; i+=1 {
 		s.queue.Push(i)
 	}
 
-	c.Assert(s.queue.Size(), Equals, uint64(10))
+	c.Assert(s.queue.Size(), Equals, uint64(16))
+
+	res, err := s.queue.Push(17)
+	c.Assert(res, Equals, false)
+	c.Assert(err, ErrorMatches, "ERROR_FULL: attempt to Put while Queue is Full")
 }
 
 
@@ -85,6 +89,10 @@ func (s *ArrayBlockingQueueSuite) TestPop(c *C) {
 	}
 
 	c.Assert(s.queue.Size(), Equals, uint64(0))
+
+	res, err := s.queue.Pop()
+	c.Assert(res, Equals, false)
+	c.Assert(err, ErrorMatches, "ERROR_EMPTY: attempt to Get while Queue is Empty")
 }
 
 
@@ -102,9 +110,50 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPop(c *C) {
 	}
 
 	c.ResetTimer()
-	c.StartTimer()
 
 	for i := 0; i < c.N; i++ {
 		q.Pop()
 	}
 }
+
+
+func (s *ArrayBlockingQueueSuite) TestClear(c *C) {
+	for i:= 0;i < 10; i+=1 {
+		s.queue.Push(i)
+	}
+
+	s.queue.Clear()
+
+	c.Assert(s.queue.Size(), Equals, uint64(0))
+}
+
+
+func (s *ArrayBlockingQueueSuite) TestPeek(c *C) {
+	for i:= 0;i < 10; i+=1 {
+		s.queue.Push(i)
+	}
+
+	c.Assert(s.queue.Peek(), Equals, 0)
+
+	s.queue.Pop()
+
+	c.Assert(s.queue.Peek(), Equals, 1)
+}
+
+
+func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
+	for i := 0; i < c.N; i++ {
+		s.queue.Peek()
+	}
+
+	q, _ := NewArrayBlockingQueue(math.MaxUint16)
+
+	q.Push(1);q.Push(1);q.Push(1)
+
+	c.ResetTimer()
+
+	for i := 0; i < c.N; i++ {
+		s.queue.Peek()
+	}
+}
+
