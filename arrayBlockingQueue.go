@@ -182,12 +182,38 @@ func (q *ArrayBlockingQueue) Clear() {
 	q.notFull.Broadcast()
 }
 
-//// Takes an element from the head of the queue.
-//// It blocks the current goroutine if the queue is Empty until notified
-//func (q *ArrayBlockingQueue) Get() (interface{}, error) {
-//}
-//
-//// Puts an element to the tail of the queue.
-//// It blocks the current goroutine if the queue is Full until notified
-//func (q *ArrayBlockingQueue) Put(item interface{}) (bool, error) {
-//}
+// Takes an element from the head of the queue.
+// It blocks the current goroutine if the queue is Empty until notified
+func (q *ArrayBlockingQueue) Get() (interface{}, error) {
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	for q.count == 0 {
+		// We wait here until the queue has an item
+		q.notEmpty.Wait()
+	}
+
+	// Critical section after wait released and predicate is false
+	var item, err = q.Pop()
+	return item, err
+}
+
+// Puts an element to the tail of the queue.
+// It blocks the current goroutine if the queue is Full until notified
+func (q *ArrayBlockingQueue) Put(item interface{}) (bool, error) {
+	if item == nil {
+		panic("Null item")
+	}
+
+	q.lock.RLock()
+	defer q.lock.RUnlock()
+
+	for q.count == uint64(len(q.store)) {
+		// We wait here until the queue has an empty slot
+		q.notFull.Wait()
+	}
+
+	// Critical section after wait released and predicate is false
+	var res, err = q.Push(item)
+	return res, err
+}
