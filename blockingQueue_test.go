@@ -49,3 +49,62 @@ func (s *ArrayBlockingQueueSuite) TestIncrement(c *C) {
 	s.queue.store.Set(2, uint64(1))
 	c.Assert(s.queue.inc(2), Equals, uint64(0))
 }
+
+func (s *ArrayBlockingQueueSuite) TestPush(c *C) {
+	for i:= 0;i < 10; i+=1 {
+		s.queue.Push(i)
+	}
+
+	c.Assert(s.queue.Size(), Equals, uint64(10))
+}
+
+
+func (s *ArrayBlockingQueueSuite) BenchmarkPushOverflow(c *C) {
+	for i := 0; i < c.N; i++ {
+		s.queue.Push(i)
+	}
+}
+
+func (s *ArrayBlockingQueueSuite) BenchmarkPush(c *C) {
+	q, _ := NewArrayBlockingQueue(math.MaxUint16)
+
+	c.ResetTimer()
+
+	for i := 0; i < c.N; i++ {
+		q.Push(i)
+	}
+}
+
+func (s *ArrayBlockingQueueSuite) TestPop(c *C) {
+	for i:= 0;i < 10; i+=1 {
+		s.queue.Push(i)
+	}
+
+	for i:= 0;i < 10; i+=1 {
+		s.queue.Pop()
+	}
+
+	c.Assert(s.queue.Size(), Equals, uint64(0))
+}
+
+
+func (s *ArrayBlockingQueueSuite) BenchmarkPopOverflow(c *C) {
+	for i := 0; i < c.N; i++ {
+		s.queue.Pop()
+	}
+}
+
+func (s *ArrayBlockingQueueSuite) BenchmarkPop(c *C) {
+	q, _ := NewArrayBlockingQueue(math.MaxUint16)
+
+	for i := 0; i < c.N; i++ {
+		q.Push(i)
+	}
+
+	c.ResetTimer()
+	c.StartTimer()
+
+	for i := 0; i < c.N; i++ {
+		q.Pop()
+	}
+}
