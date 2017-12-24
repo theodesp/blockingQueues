@@ -51,7 +51,7 @@ func (s *ArrayBlockingQueueSuite) TestIncrement(c *C) {
 }
 
 func (s *ArrayBlockingQueueSuite) TestPush(c *C) {
-	for i:= 0;i < 16; i+=1 {
+	for i := 0; i < 16; i += 1 {
 		s.queue.Push(i)
 	}
 
@@ -61,7 +61,6 @@ func (s *ArrayBlockingQueueSuite) TestPush(c *C) {
 	c.Assert(res, Equals, false)
 	c.Assert(err, ErrorMatches, "ERROR_FULL: attempt to Put while Queue is Full")
 }
-
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPushOverflow(c *C) {
 	for i := 0; i < c.N; i++ {
@@ -80,21 +79,20 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPush(c *C) {
 }
 
 func (s *ArrayBlockingQueueSuite) TestPop(c *C) {
-	for i:= 0;i < 10; i+=1 {
+	for i := 0; i < 10; i += 1 {
 		s.queue.Push(i)
 	}
 
-	for i:= 0;i < 10; i+=1 {
+	for i := 0; i < 10; i += 1 {
 		s.queue.Pop()
 	}
 
 	c.Assert(s.queue.Size(), Equals, uint64(0))
 
 	res, err := s.queue.Pop()
-	c.Assert(res, Equals, false)
+	c.Assert(res, IsNil)
 	c.Assert(err, ErrorMatches, "ERROR_EMPTY: attempt to Get while Queue is Empty")
 }
-
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPopOverflow(c *C) {
 	for i := 0; i < c.N; i++ {
@@ -116,9 +114,8 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPop(c *C) {
 	}
 }
 
-
 func (s *ArrayBlockingQueueSuite) TestClear(c *C) {
-	for i:= 0;i < 10; i+=1 {
+	for i := 0; i < 10; i += 1 {
 		s.queue.Push(i)
 	}
 
@@ -127,9 +124,8 @@ func (s *ArrayBlockingQueueSuite) TestClear(c *C) {
 	c.Assert(s.queue.Size(), Equals, uint64(0))
 }
 
-
 func (s *ArrayBlockingQueueSuite) TestPeek(c *C) {
-	for i:= 0;i < 10; i+=1 {
+	for i := 0; i < 10; i += 1 {
 		s.queue.Push(i)
 	}
 
@@ -140,7 +136,6 @@ func (s *ArrayBlockingQueueSuite) TestPeek(c *C) {
 	c.Assert(s.queue.Peek(), Equals, 1)
 }
 
-
 func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
 	for i := 0; i < c.N; i++ {
 		s.queue.Peek()
@@ -148,7 +143,9 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
 
 	q, _ := NewArrayBlockingQueue(math.MaxUint16)
 
-	q.Push(1);q.Push(1);q.Push(1)
+	q.Push(1)
+	q.Push(1)
+	q.Push(1)
 
 	c.ResetTimer()
 
@@ -157,3 +154,34 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
 	}
 }
 
+//func (s *ArrayBlockingQueueSuite) TestPut(c *C) {
+//	defer func() {
+//		if r := recover(); r == nil {
+//			c.Errorf("TestPutNotFull should have panicked!")
+//		}
+//	}()
+//
+//	s.queue.Put(nil)
+//
+//	for i := 0; i < 16; i += 1 {
+//		s.queue.Push(i)
+//	}
+//
+//	c.Assert(s.queue.Size(), Equals, uint64(16))
+//
+//	n := 2
+//	running := make(chan bool, n)
+//	awake := make(chan bool, n)
+//	for i := 0; i < n; i++ {
+//		go func() {
+//			m.Lock()
+//			running <- true
+//			c.Wait()
+//			awake <- true
+//			m.Unlock()
+//		}()
+//	}
+//	for i := 0; i < n; i++ {
+//		<-running // Wait for everyone to run.
+//	}
+//}

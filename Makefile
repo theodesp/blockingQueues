@@ -19,7 +19,7 @@ test:
 
 .PHONY: bench
 bench:
-	GOPATH=$(GOPATH) go test -bench=. -check.b -benchmem
+	GOPATH=$(GOPATH) go test -bench=. -check.b
 
 .PHONY: docs
 docs:

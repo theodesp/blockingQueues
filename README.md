@@ -34,11 +34,12 @@ Using:
 Simple operations - no goroutines
 
 ```text
-ArrayBlockingQueueSuite.BenchmarkPeek  50000000                56.5 ns/op
-ArrayBlockingQueueSuite.BenchmarkPop    50000000                49.1 ns/op
-ArrayBlockingQueueSuite.BenchmarkPopOverflow    50000000                51.3 ns/op
-ArrayBlockingQueueSuite.BenchmarkPush   20000000                84.7 ns/op
-ArrayBlockingQueueSuite.BenchmarkPushOverflow   20000000                75.3 ns/op
+ArrayBlockingQueueSuite.BenchmarkPeek     100000000               21.0 ns/op
+ArrayBlockingQueueSuite.BenchmarkPop      100000000               20.7 ns/op
+ArrayBlockingQueueSuite.BenchmarkPopOverflow       100000000               20.8 ns/op
+ArrayBlockingQueueSuite.BenchmarkPush      50000000                38.9 ns/op
+ArrayBlockingQueueSuite.BenchmarkPushOverflow      50000000                39.0 ns/op
+
 ```
 
 ## LICENCE

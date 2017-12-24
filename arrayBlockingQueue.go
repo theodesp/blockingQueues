@@ -37,12 +37,12 @@ func NewArrayBlockingQueue(capacity uint64) (*BlockingQueue, error) {
 		return nil, ErrorCapacity
 	}
 
-	lock := new(sync.RWMutex)
+	lock := new(sync.Mutex)
 
 	return &BlockingQueue{
 		lock:     lock,
-		notEmpty: sync.NewCond(lock.RLocker()),
-		notFull:  sync.NewCond(lock.RLocker()),
+		notEmpty: sync.NewCond(lock),
+		notFull:  sync.NewCond(lock),
 		count:    uint64(0),
 		store:    NewArrayStore(capacity),
 	}, nil
