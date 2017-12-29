@@ -39,7 +39,12 @@ ArrayBlockingQueueSuite.BenchmarkPop      100000000               20.7 ns/op
 ArrayBlockingQueueSuite.BenchmarkPopOverflow       100000000               20.8 ns/op
 ArrayBlockingQueueSuite.BenchmarkPush      50000000                38.9 ns/op
 ArrayBlockingQueueSuite.BenchmarkPushOverflow      50000000                39.0 ns/op
+```
 
+Multiple Goroutines - Different ratio of readers/writers
+
+```text
+PASS: arrayBlockingQueue_test.go:221: ArrayBlockingQueueSuite.BenchmarkPut1to1  10000000               177 ns/op
 ```
 
 ## LICENCE

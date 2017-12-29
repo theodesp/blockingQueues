@@ -15,11 +15,11 @@ debs:
 
 .PHONY: test
 test:
-	GOPATH=$(GOPATH) go test
+	GOPATH=$(GOPATH) go test -race
 
 .PHONY: bench
 bench:
-	GOPATH=$(GOPATH) go test -bench=. -check.b
+	GOPATH=$(GOPATH) go test -bench=. -check.b -benchmem
 
 .PHONY: docs
 docs:

@@ -62,21 +62,6 @@ func (s *ArrayBlockingQueueSuite) TestPush(c *C) {
 	c.Assert(err, ErrorMatches, "ERROR_FULL: attempt to Put while Queue is Full")
 }
 
-func (s *ArrayBlockingQueueSuite) BenchmarkPushOverflow(c *C) {
-	for i := 0; i < c.N; i++ {
-		s.queue.Push(i)
-	}
-}
-
-func (s *ArrayBlockingQueueSuite) BenchmarkPush(c *C) {
-	q, _ := NewArrayBlockingQueue(math.MaxUint16)
-
-	c.ResetTimer()
-
-	for i := 0; i < c.N; i++ {
-		q.Push(i)
-	}
-}
 
 func (s *ArrayBlockingQueueSuite) TestPop(c *C) {
 	for i := 0; i < 10; i += 1 {
@@ -94,25 +79,6 @@ func (s *ArrayBlockingQueueSuite) TestPop(c *C) {
 	c.Assert(err, ErrorMatches, "ERROR_EMPTY: attempt to Get while Queue is Empty")
 }
 
-func (s *ArrayBlockingQueueSuite) BenchmarkPopOverflow(c *C) {
-	for i := 0; i < c.N; i++ {
-		s.queue.Pop()
-	}
-}
-
-func (s *ArrayBlockingQueueSuite) BenchmarkPop(c *C) {
-	q, _ := NewArrayBlockingQueue(math.MaxUint16)
-
-	for i := 0; i < c.N; i++ {
-		q.Push(i)
-	}
-
-	c.ResetTimer()
-
-	for i := 0; i < c.N; i++ {
-		q.Pop()
-	}
-}
 
 func (s *ArrayBlockingQueueSuite) TestClear(c *C) {
 	for i := 0; i < 10; i += 1 {
@@ -136,52 +102,168 @@ func (s *ArrayBlockingQueueSuite) TestPeek(c *C) {
 	c.Assert(s.queue.Peek(), Equals, 1)
 }
 
-func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
-	for i := 0; i < c.N; i++ {
-		s.queue.Peek()
-	}
 
-	q, _ := NewArrayBlockingQueue(math.MaxUint16)
+func (s *ArrayBlockingQueueSuite) TestPutPanicsOnNil(c *C) {
+	defer func() {
+		if r := recover(); r == nil {
+			c.Errorf("TestPutNotFull should have panicked!")
+		}
+	}()
 
-	q.Push(1)
-	q.Push(1)
-	q.Push(1)
-
-	c.ResetTimer()
-
-	for i := 0; i < c.N; i++ {
-		s.queue.Peek()
-	}
+	s.queue.Put(nil)
 }
 
-//func (s *ArrayBlockingQueueSuite) TestPut(c *C) {
-//	defer func() {
-//		if r := recover(); r == nil {
-//			c.Errorf("TestPutNotFull should have panicked!")
-//		}
-//	}()
-//
-//	s.queue.Put(nil)
-//
-//	for i := 0; i < 16; i += 1 {
-//		s.queue.Push(i)
+func (s *ArrayBlockingQueueSuite) TestPutBlocks(c *C) {
+	q, _ := NewArrayBlockingQueue(16)
+	for i := 0; i < 16; i += 1 {
+		q.Push(i)
+	}
+
+	c.Assert(q.Size(), Equals, uint64(16))
+
+	n := 2
+	running := make(chan bool, n)
+	awake := make(chan bool, n)
+
+	// The next 2 items will block
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			running <- true
+			q.Put(i)
+			awake <- true
+		}(i)
+	}
+	for i := 0; i < n; i++ {
+		<-running // Wait for everyone to run.
+	}
+	j := 0
+	for n > 0 {
+		select {
+		case <-awake:
+			c.Error("BlockingArray not asleep")
+		default:
+		}
+		item, err := q.Get()
+		c.Assert(err, IsNil)
+		c.Assert(item, Equals, j)
+		<-awake // Will deadlock if no goroutine wakes up
+		select {
+		case <-awake:
+			c.Error("too many waiters awake")
+		default:
+		}
+		n--
+		j += 1
+	}
+	thirdItem, err2 := q.Get()
+
+	c.Assert(err2, IsNil)
+	c.Assert(thirdItem, Equals, 2)
+}
+
+//func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
+//	for i := 0; i < c.N; i++ {
+//		s.queue.Peek()
 //	}
 //
-//	c.Assert(s.queue.Size(), Equals, uint64(16))
+//	q, _ := NewArrayBlockingQueue(math.MaxUint16)
 //
-//	n := 2
-//	running := make(chan bool, n)
-//	awake := make(chan bool, n)
-//	for i := 0; i < n; i++ {
-//		go func() {
-//			m.Lock()
-//			running <- true
-//			c.Wait()
-//			awake <- true
-//			m.Unlock()
-//		}()
-//	}
-//	for i := 0; i < n; i++ {
-//		<-running // Wait for everyone to run.
+//	q.Push(1)
+//	q.Push(1)
+//	q.Push(1)
+//
+//	c.ResetTimer()
+//
+//	for i := 0; i < c.N; i++ {
+//		s.queue.Peek()
 //	}
 //}
+//
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPopOverflow(c *C) {
+//	for i := 0; i < c.N; i++ {
+//		s.queue.Pop()
+//	}
+//}
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPop(c *C) {
+//	q, _ := NewArrayBlockingQueue(math.MaxUint16)
+//
+//	for i := 0; i < c.N; i++ {
+//		q.Push(i)
+//	}
+//
+//	c.ResetTimer()
+//
+//	for i := 0; i < c.N; i++ {
+//		q.Pop()
+//	}
+//}
+//
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPushOverflow(c *C) {
+//	for i := 0; i < c.N; i++ {
+//		s.queue.Push(i)
+//	}
+//}
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPush(c *C) {
+//	q, _ := NewArrayBlockingQueue(math.MaxUint16)
+//
+//	c.ResetTimer()
+//
+//	for i := 0; i < c.N; i++ {
+//		q.Push(i)
+//	}
+//}
+
+
+func (s *ArrayBlockingQueueSuite) BenchmarkPut1to1(c *C) {
+	benchmarkPut(c, 1, 1)
+}
+
+//func (s *ArrayBlockingQueueSuite) BenchmarkPut2to1(c *C) {
+//	benchmarkPut(c, 2, 1)
+//}
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPut1to2(c *C) {
+//	benchmarkPut(c, 1, 2)
+//}
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPut3to1(c *C) {
+//	benchmarkPut(c, 3, 1)
+//}
+//
+//func (s *ArrayBlockingQueueSuite) BenchmarkPut1to3(c *C) {
+//	benchmarkPut(c, 1, 3)
+//}
+//
+
+func benchmarkPut(c *C, writers int, readers int) {
+	q, _ := NewArrayBlockingQueue(1024)
+	done := make(chan bool)
+
+	for writer := 0; writer < writers; writer++ {
+		go func() {
+			for i := 0; i < c.N; i++ {
+				q.Put(i)
+			}
+			done <- true
+		}()
+	}
+
+	for reader := 0; reader < readers; reader++ {
+		go func() {
+			for i := 0; i < c.N; i++ {
+				q.Get()
+			}
+			done <- true
+		}()
+	}
+
+	<-done;<-done
+
+	//for routine := 0; routine < readers + writers; routine++ {
+	//	<-done
+	//}
+}

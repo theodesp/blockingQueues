@@ -74,13 +74,13 @@ func (q *BlockingQueue) push(item interface{}) {
 
 // Pops element at current read position, advances, and signals.
 // Call only when holding lock.
-func (q *BlockingQueue) pop() interface{} {
-	var item = q.store.Remove(q.readIndex)
+func (q *BlockingQueue) pop() (item interface{}) {
+	item = q.store.Remove(q.readIndex)
 	q.readIndex = q.inc(q.readIndex)
 	q.count -= 1
 	q.notFull.Signal()
 
-	return item
+	return
 }
 
 // Pushes the specified element at the tail of the queue.
@@ -97,33 +97,39 @@ func (q *BlockingQueue) Push(item interface{}) (bool, error) {
 // do so immediately without exceeding the queue's capacity,
 // returning true upon success and false if this queue is full.
 // Does not block the current goroutine
-func (q *BlockingQueue) Offer(item interface{}) bool {
+func (q *BlockingQueue) Offer(item interface{}) (res bool) {
 	if item == nil {
 		panic("Null item")
 	}
 
-	var res bool
-
 	q.lock.Lock()
-	if q.count == q.store.Size() {
-		res = false
-	} else {
-		q.push(item)
-		res = true
-	}
+	res, _ = q.tryPush(item)
 	q.lock.Unlock()
 
-	return res
+	return
+}
+
+func (q *BlockingQueue) tryPush(item interface{}) (res bool, err error) {
+	if q.count == q.store.Size() {
+		res, err = false, ErrorFull
+	} else {
+		q.push(item)
+		res, err = true, nil
+	}
+	return
 }
 
 // Pops an element from the head of the queue.
 // Does not block the current goroutine
-func (q *BlockingQueue) Pop() (interface{}, error) {
+func (q *BlockingQueue) Pop() (res interface{}, err error) {
 	q.lock.Lock()
+	res, err = q.tryPop()
+	q.lock.Unlock()
 
-	var res interface{}
-	var err error
+	return res, err
+}
 
+func (q *BlockingQueue) tryPop() (res interface{}, err error) {
 	if q.count == 0 {
 		// Case empty
 		res, err = nil, ErrorEmpty
@@ -131,9 +137,8 @@ func (q *BlockingQueue) Pop() (interface{}, error) {
 		var item = q.pop()
 		res, err = item, nil
 	}
-	q.lock.Unlock()
 
-	return res, err
+	return
 }
 
 // Just attempts to return the tail element of the queue
@@ -188,7 +193,7 @@ func (q *BlockingQueue) Get() (interface{}, error) {
 	}
 
 	// Critical section after wait released and predicate is false
-	var item, err = q.Pop()
+	var item, err = q.tryPop()
 	q.lock.Unlock()
 
 	return item, err
@@ -209,7 +214,7 @@ func (q *BlockingQueue) Put(item interface{}) (bool, error) {
 	}
 
 	// Critical section after wait released and predicate is false
-	var res, err = q.Push(item)
+	var res, err = q.tryPush(item)
 	q.lock.Unlock()
 
 	return res, err
