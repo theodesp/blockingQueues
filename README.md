@@ -24,7 +24,7 @@ provide good documentation on the code and some examples of usage.
 ## Queues Provided
 * **ArrayBlockingQueue**: A bounded blocking queue backed by a slice
 * **LinkedBlockingQueue**: A bounded blocking queue backed by a container/list
-* 
+
 ## Installation
 ```go
 go get -u github.com/theodesp/blockingQueues
