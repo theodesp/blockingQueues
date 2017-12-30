@@ -14,7 +14,8 @@ type Interface interface {
 	Push(item interface{}) (bool, error)
 	Pop() (interface{}, error)
 
-	Poll() (interface{}, error)
+	Get() (interface{}, error)
+	Put(item interface{}) (bool, error)
 	Offer(item interface{}) bool
 
 	Peek() interface{}

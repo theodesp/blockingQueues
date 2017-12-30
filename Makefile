@@ -13,13 +13,9 @@ debs:
 	GOPATH=$(GOPATH) go get -u gopkg.in/check.v1
 	GOPATH=$(GOPATH) go get -u github.com/fortytw2/leaktest
 
-.PHONE: vet
-vet:
-	GOPATH=$(GOPATH) go vet ./...
-
 .PHONY: test
 test:
-	GOPATH=$(GOPATH) go test -race
+	GOPATH=$(GOPATH) go test -race -gcflags -m
 
 .PHONY: bench
 bench:

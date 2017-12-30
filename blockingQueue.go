@@ -33,7 +33,7 @@ type BlockingQueue struct {
 }
 
 // Returns the next increment of idx. Circulates the index
-func (q BlockingQueue) inc(idx uint64) uint64 {
+func (q *BlockingQueue) inc(idx uint64) uint64 {
 	if idx >= math.MaxUint64 {
 		panic("Overflow")
 	}
@@ -46,7 +46,7 @@ func (q BlockingQueue) inc(idx uint64) uint64 {
 }
 
 // Size returns this current elements size, is concurrent safe
-func (q BlockingQueue) Size() uint64 {
+func (q *BlockingQueue) Size() uint64 {
 	q.lock.Lock()
 	res := q.count
 	q.lock.Unlock()
@@ -55,7 +55,7 @@ func (q BlockingQueue) Size() uint64 {
 }
 
 // Capacity returns this current elements remaining capacity, is concurrent safe
-func (q BlockingQueue) Capacity() uint64 {
+func (q *BlockingQueue) Capacity() uint64 {
 	q.lock.Lock()
 	res := uint64(q.store.Size() - q.count)
 	q.lock.Unlock()

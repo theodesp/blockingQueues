@@ -1,5 +1,6 @@
 package blockingQueues
 
+
 import (
 	"container/list"
 	. "gopkg.in/check.v1"

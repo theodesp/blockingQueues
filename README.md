@@ -28,6 +28,7 @@ provide good documentation on the code and some examples of usage.
 ## Queues Provided
 * **ArrayBlockingQueue**: A bounded blocking queue backed by a slice
 * **LinkedBlockingQueue**: A bounded blocking queue backed by a container/list
+* **ConcurrentRingBuffer**: A bounded lock-free queue backed by a slice
 
 ## Installation
 ```go
@@ -124,6 +125,21 @@ LinkedBlockingQueueSuite.BenchmarkPut2to3     2000000              1053 ns/op
 LinkedBlockingQueueSuite.BenchmarkPut3to2     2000000              1041 ns/op
 LinkedBlockingQueueSuite.BenchmarkPut4to1     1000000              1488 ns/op
 LinkedBlockingQueueSuite.BenchmarkPut4to4     1000000              1451 ns/op
+```
+
+#### ConcurrentRingBuffer
+Test
+```text
+ConcurrentRingBufferSuite.BenchmarkRingBuffer1to1        20000000                85.7 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer1to3         1000000              2793 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer1to4          500000              5501 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer2to1         5000000               465 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer2to2         5000000               474 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer2to3         1000000              2640 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer3to2         1000000              2766 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer4to1         1000000              5411 ns/op
+ConcurrentRingBufferSuite.BenchmarkRingBuffer4to4          500000              5370 ns/op
+
 ```
 
 ## LICENCE

@@ -1,14 +1,10 @@
 package blockingQueues
 
-import (
-	"testing"
 
+import (
 	. "gopkg.in/check.v1"
 	"math"
 )
-
-// Hook up gocheck into the "go test" runner.
-func Test(t *testing.T) { TestingT(t) }
 
 type ArrayBlockingQueueSuite struct {
 	queue  *BlockingQueue
