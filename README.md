@@ -8,6 +8,13 @@ Blocking Queues
 <img src="https://img.shields.io/github/license/mashape/apistatus.svg" alt="License"/>
 </a>
 
+<a href="https://travis-ci.org/theodesp/blockingQueues" rel="nofollow">
+<img src="https://travis-ci.org/theodesp/blockingQueues.svg?branch=master" />
+</a>
+
+<a href="https://codecov.io/gh/theodesp/blockingQueues">
+  <img src="https://codecov.io/gh/theodesp/blockingQueues/branch/master/graph/badge.svg" />
+</a>
 
 Blocking Queues provides some simple, performant, goroutine safe queues useful as resource pools or job queues. 
 The primary focus is simplicity and high performance without sacrificing readability. In fact I tried to
