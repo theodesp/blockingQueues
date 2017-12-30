@@ -4,6 +4,7 @@ os:
   - linux
 
 before_install:
+  - make debs
   - pip install --user codecov
 
 after_success:
