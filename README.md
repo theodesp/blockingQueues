@@ -4,6 +4,11 @@ Blocking Queues
 <img src="https://godoc.org/github.com/theodesp/blockingQueues?status.svg" alt="GoDoc">
 </a>
 
+<a href="https://opensource.org/licenses/MIT" rel="nofollow">
+<img src="https://img.shields.io/github/license/mashape/apistatus.svg" alt="License"/>
+</a>
+
+
 Blocking Queues provides some simple, performant, goroutine safe queues useful as resource pools or job queues. 
 The primary focus is simplicity and high performance without sacrificing readability. In fact I tried to
 provide good documentation on the code and some examples of usage.
@@ -12,7 +17,7 @@ provide good documentation on the code and some examples of usage.
 ## Queues Provided
 * **ArrayBlockingQueue**: A bounded blocking queue backed by a slice
 * **LinkedBlockingQueue**: A bounded blocking queue backed by a container/list
-
+* 
 ## Installation
 ```go
 go get -u github.com/theodesp/blockingQueues
@@ -20,6 +25,33 @@ go get -u github.com/theodesp/blockingQueues
 
 ## Usage
 
+Non blocking api
+```go
+queue, _ := NewArrayBlockingQueue(2)
+res, _ := queue.Push(1)
+res, _ := queue.Push(2)
+res, err := queue.Push(3) // err is not Nil as queue is full
+res, err := queue.Pop()
+res, err := queue.Pop()
+res, err := queue.Pop() // err is not Nil as queue is empty
+```
+
+Blocking api
+```go
+queue, _ := NewArrayBlockingQueue(2)
+res, _ := queue.Put(1)
+res, _ := queue.Put(2)
+res, err := queue.Put(3) // Will block the current goroutine
+
+// In another goroutine
+res, err := queue.Get() // Will unblock the first goroutine and add the last item
+res, err := queue.Get()
+res, err := queue.Get()
+res, err := queue.Get() // Will block the current goroutine
+```
+
+Full API Documentation: 
+[https://godoc.org/github.com/theodesp/blockingQueues](https://godoc.org/github.com/theodesp/blockingQueues)
 
 ## Benchmarks
 Using:

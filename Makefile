@@ -21,10 +21,6 @@ test:
 bench:
 	GOPATH=$(GOPATH) go test -bench=. -check.b -benchmem
 
-.PHONY: docs
-docs:
-	GOPATH=$(GOPATH) find . -type f -name "*.go*" -print0 | xargs -0 gocco
-
 # Clean junk
 .PHONY: clean
 clean:
