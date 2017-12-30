@@ -6,12 +6,14 @@ import (
 )
 
 type LinkedListStore struct {
-	store *list.List
+	store    *list.List
+	capacity uint64
 }
 
-func NewLinkedListStore() *LinkedListStore {
+func NewLinkedListStore(capacity uint64) *LinkedListStore {
 	return &LinkedListStore{
-		store: list.New(),
+		store:    list.New(),
+		capacity: capacity,
 	}
 }
 
@@ -29,7 +31,7 @@ func (s *LinkedListStore) Remove(pos uint64) interface{} {
 }
 
 func (s LinkedListStore) Size() uint64 {
-	return uint64(s.store.Len())
+	return s.capacity
 }
 
 // Creates an BlockingQueue backed by an LinkedList with the given (fixed) capacity
@@ -46,6 +48,6 @@ func NewLinkedBlockingQueue(capacity uint64) (*BlockingQueue, error) {
 		notEmpty: sync.NewCond(lock),
 		notFull:  sync.NewCond(lock),
 		count:    uint64(0),
-		store:    NewLinkedListStore(),
+		store:    NewLinkedListStore(capacity),
 	}, nil
 }

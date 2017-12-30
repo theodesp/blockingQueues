@@ -34,7 +34,7 @@ Using:
   L3 Cache:	4 MB
   Memory:	16 GB
 ```
-
+#### ArrayBlockingQueue
 Simple operations - no goroutines
 
 ```text
@@ -64,6 +64,24 @@ ArrayBlockingQueueSuite.BenchmarkPut3to2   2000000               816 ns/op
 ArrayBlockingQueueSuite.BenchmarkPut4to1   1000000              1239 ns/op
 ```
 Having a different ratio of readers and writers introduce the same amount of latency.
+
+#### LinkedBlockingQueue
+```text
+LinkedBlockingQueueSuite.BenchmarkPeek       100000000               21.4 ns/op
+LinkedBlockingQueueSuite.BenchmarkPop100000000               24.4 ns/op
+LinkedBlockingQueueSuite.BenchmarkPopOverflow        100000000               23.4 ns/op
+LinkedBlockingQueueSuite.BenchmarkPush       50000000                47.3 ns/op
+LinkedBlockingQueueSuite.BenchmarkPushOverflow       50000000                42.1 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut1to1    10000000               246 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut1to3     2000000               930 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut1to4     1000000              1496 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut2to1     5000000               578 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut2to2     5000000               560 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut2to3     2000000              1053 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut3to2     2000000              1041 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut4to1     1000000              1488 ns/op
+LinkedBlockingQueueSuite.BenchmarkPut4to4     1000000              1451 ns/op
+```
 
 ## LICENCE
 Copyright © 2017 Theo Despoudis MIT license

@@ -5,20 +5,21 @@ import (
 
 	. "gopkg.in/check.v1"
 	"math"
-	"sync"
 )
 
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { TestingT(t) }
 
 type ArrayBlockingQueueSuite struct {
-	queue *BlockingQueue
+	queue  *BlockingQueue
+	queue2 *BlockingQueue
 }
 
 var _ = Suite(&ArrayBlockingQueueSuite{})
 
 func (s *ArrayBlockingQueueSuite) SetUpTest(c *C) {
 	s.queue, _ = NewArrayBlockingQueue(16)
+	s.queue2, _ = NewArrayBlockingQueue(1024)
 }
 
 func (s *ArrayBlockingQueueSuite) TestInvalidCapacity(c *C) {
@@ -26,7 +27,7 @@ func (s *ArrayBlockingQueueSuite) TestInvalidCapacity(c *C) {
 	c.Assert(err, ErrorMatches, "ERROR_CAPACITY: attempt to Create Queue with invalid Capacity")
 }
 
-func (s *ArrayBlockingQueueSuite) TestContstructor(c *C) {
+func (s *ArrayBlockingQueueSuite) TestConstructor(c *C) {
 	q, err := NewArrayBlockingQueue(16)
 
 	c.Assert(err, IsNil)
@@ -112,7 +113,7 @@ func (s *ArrayBlockingQueueSuite) TestPutPanicsOnNil(c *C) {
 }
 
 func (s *ArrayBlockingQueueSuite) TestPutBlocks(c *C) {
-	q, _ := NewArrayBlockingQueue(16)
+	q := s.queue
 	for i := 0; i < 16; i += 1 {
 		q.Push(i)
 	}
@@ -177,7 +178,6 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPeek(c *C) {
 	}
 }
 
-
 func (s *ArrayBlockingQueueSuite) BenchmarkPopOverflow(c *C) {
 	for i := 0; i < c.N; i++ {
 		s.queue.Pop()
@@ -198,7 +198,6 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPop(c *C) {
 	}
 }
 
-
 func (s *ArrayBlockingQueueSuite) BenchmarkPushOverflow(c *C) {
 	for i := 0; i < c.N; i++ {
 		s.queue.Push(i)
@@ -215,147 +214,38 @@ func (s *ArrayBlockingQueueSuite) BenchmarkPush(c *C) {
 	}
 }
 
-
 func (s *ArrayBlockingQueueSuite) BenchmarkPut1to1(c *C) {
-	benchmarkPut(c, 1, 1)
+	benchmarkPut(c, 1, 1, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut2to2(c *C) {
-	benchmarkPut(c, 2, 2)
+	benchmarkPut(c, 2, 2, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut4to4(c *C) {
-	benchmarkPut(c, 4, 4)
+	benchmarkPut(c, 4, 4, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut4to1(c *C) {
-	benchmarkPutMoreWriters(c, 4, 1)
+	benchmarkPutMoreWriters(c, 4, 1, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut2to1(c *C) {
-	benchmarkPutMoreWriters(c, 2, 1)
+	benchmarkPutMoreWriters(c, 2, 1, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut3to2(c *C) {
-	benchmarkPutMoreWriters(c, 3, 2)
+	benchmarkPutMoreWriters(c, 3, 2, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut1to3(c *C) {
-	benchmarkPutMoreReaders(c, 1, 3)
+	benchmarkPutMoreReaders(c, 1, 3, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut2to3(c *C) {
-	benchmarkPutMoreReaders(c, 2, 3)
+	benchmarkPutMoreReaders(c, 2, 3, s.queue2)
 }
 
 func (s *ArrayBlockingQueueSuite) BenchmarkPut1to4(c *C) {
-	benchmarkPutMoreReaders(c, 1, 4)
-}
-
-func benchmarkPut(c *C, writers int, readers int) {
-	q, _ := NewArrayBlockingQueue(1024)
-
-	wg := sync.WaitGroup{}
-
-	for writer := 0; writer < writers; writer++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Put(i)
-			}
-			wg.Done()
-		}()
-	}
-
-	for reader := 0; reader < readers; reader++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Get()
-			}
-			wg.Done()
-		}()
-	}
-
-	wg.Wait()
-}
-
-func benchmarkPutMoreWriters(c *C, writers int, readers int) {
-	q, _ := NewArrayBlockingQueue(1024)
-
-	wg := sync.WaitGroup{}
-
-	rest := writers - readers
-
-	for writer := 0; writer < writers; writer++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Put(i)
-			}
-			wg.Done()
-		}()
-	}
-
-	for reader := 0; reader < readers; reader++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Get()
-			}
-			wg.Done()
-		}()
-	}
-	c.ResetTimer()
-	for reader := 0; reader < rest; reader++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Get()
-			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
-
-}
-
-func benchmarkPutMoreReaders(c *C, writers int, readers int) {
-	q, _ := NewArrayBlockingQueue(1024)
-
-	wg := sync.WaitGroup{}
-
-	rest := readers - writers
-
-	for writer := 0; writer < writers; writer++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Put(i)
-			}
-			wg.Done()
-		}()
-	}
-
-	for reader := 0; reader < readers; reader++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Get()
-			}
-			wg.Done()
-		}()
-	}
-	c.ResetTimer()
-
-	for writer := 0; writer < rest; writer++ {
-		wg.Add(1)
-		go func() {
-			for i := 0; i < c.N; i++ {
-				q.Put(i)
-			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
+	benchmarkPutMoreReaders(c, 1, 4, s.queue2)
 }
