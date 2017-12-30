@@ -16,6 +16,10 @@ Blocking Queues
   <img src="https://codecov.io/gh/theodesp/blockingQueues/branch/master/graph/badge.svg" />
 </a>
 
+<a href="https://ci.appveyor.com/project/theodesp/blockingqueues" rel="nofollow">
+  <img src="https://ci.appveyor.com/api/projects/status/7yiwtn68qmcj71xy?svg=true" />
+</a>
+
 Blocking Queues provides some simple, performant, goroutine safe queues useful as resource pools or job queues. 
 The primary focus is simplicity and high performance without sacrificing readability. In fact I tried to
 provide good documentation on the code and some examples of usage.
