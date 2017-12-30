@@ -174,7 +174,6 @@ func (q *BlockingQueue) Clear() {
 		q.store.Remove(next)
 		next = q.inc(next)
 	}
-
 	q.count = uint64(0)
 	q.readIndex = uint64(0)
 	q.writeIndex = uint64(0)
@@ -212,7 +211,6 @@ func (q *BlockingQueue) Put(item interface{}) (bool, error) {
 		// We wait here until the queue has an empty slot
 		q.notFull.Wait()
 	}
-
 	// Critical section after wait released and predicate is false
 	var res, err = q.tryPush(item)
 	q.lock.Unlock()
