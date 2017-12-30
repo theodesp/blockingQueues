@@ -1,0 +1,23 @@
+language: go
+
+os:
+  - linux
+
+before_install:
+  - pip install --user codecov
+
+after_success:
+  - codecov
+
+go:
+  - 1.8.5
+  - 1.9.2
+  - tip
+
+script:
+  - make vet
+  - go test -cpu=2 -race -v ./...
+  - go test -cpu=2 -coverprofile=coverage.txt -covermode=atomic ./...
+
+notifications:
+  email: false
